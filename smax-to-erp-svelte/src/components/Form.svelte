@@ -411,14 +411,20 @@
     // Check if response is an array and has at least one item
     if (Array.isArray(response) && response.length > 0) {
       const firstResponse = response[0];
+      console.log('Processing response item:', firstResponse);
       
       if (firstResponse.success === true && firstResponse.data?.code) {
+        console.log('Found success response with code:', firstResponse.data.code);
         // Extract the numeric part from the code (e.g., "13428" from "LU13428")
-        const codeMatch = firstResponse.data.code.match(/[A-Z]+(\d+)/);
-        const leadId = codeMatch?.[1];
+        const codeMatch = firstResponse.data.code.match(/LU(\d+)/);
+        console.log('Code match result:', codeMatch);
         
-        if (leadId) {
-          showSuccess(`Đã thêm lead <a href="https://erp.nucuoimekong.vn/admin/lead/${leadId}/show" target="_blank">#${leadId}</a>`);
+        if (codeMatch && codeMatch[1]) {
+          const leadId = codeMatch[1];
+          console.log('Extracted lead ID:', leadId);
+          const successMessage = `Đã thêm lead <a href="https://erp.nucuoimekong.vn/admin/lead/${leadId}/show" target="_blank">#${leadId}</a>`;
+          console.log('Showing success message with link:', successMessage);
+          showSuccess(successMessage);
           
           // Clear form storage after successful submission
           if (formStorageKey) {
@@ -436,17 +442,23 @@
             adult: '1',
             children: '0'
           };
-        } else {
-          showSuccess(`Đã thêm lead thành công: ${firstResponse.data.code}`);
+          return;
         }
-      } else if (firstResponse.message) {
-        showSuccess(firstResponse.message);
-      } else {
-        showSuccess('Yêu cầu đã được gửi thành công');
+        
+        console.log('No lead ID found in code:', firstResponse.data.code);
+        showSuccess(`Đã thêm lead thành công: ${firstResponse.data.code}`);
+        return;
       }
-    } else {
-      showSuccess('Yêu cầu đã được gửi thành công. Vui lòng kiểm tra trong hệ thống ERP.');
+      
+      if (firstResponse.message) {
+        console.log('Showing message from response:', firstResponse.message);
+        showSuccess(firstResponse.message);
+        return;
+      }
     }
+    
+    console.log('No valid response format found');
+    showSuccess('Yêu cầu đã được gửi thành công. Vui lòng kiểm tra trong hệ thống ERP.');
   }
   
   function showSuccess(message) {
