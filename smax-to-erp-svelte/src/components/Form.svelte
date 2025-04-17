@@ -141,29 +141,29 @@
         forced_root_block: 'p',
         toolbar_mode: 'wrap',
         toolbar_sticky: false,
-        icons: 'small',
+        icons: 'material',
+        skin: 'oxide',
+        content_css: 'default',
         setup: function(editor) {
           editor.on('change', function() {
             formData.ticket_description = editor.getContent();
-            saveFormToStorage(); // Save when editor content changes
+            saveFormToStorage();
           });
           
           editor.on('init', function() {
-            // Set initial content if exists
             if (formData.ticket_description) {
               editor.setContent(formData.ticket_description);
             }
             
-            // Add custom styling
             const style = document.createElement('style');
             style.innerHTML = `
               .tox .tox-toolbar__group { padding: 0 !important; margin: 0 !important; }
-              .tox .tox-tbtn { height: 20px !important; width: 20px !important; margin: 0 !important; padding: 0 !important; }
-              .tox .tox-tbtn svg { transform: scale(0.5) !important; width: 16px !important; height: 16px !important; }
+              .tox .tox-tbtn { height: 28px !important; width: 28px !important; margin: 0 1px !important; padding: 2px !important; }
+              .tox .tox-tbtn svg { width: 16px !important; height: 16px !important; }
               .tox .tox-toolbar { padding: 0 !important; }
               .tox .tox-edit-area { padding: 0 !important; }
               .tox .tox-tbtn--enabled, .tox .tox-tbtn:hover { background: #e3e3e3 !important; }
-              .tox-icon svg, .tox-collection__item-icon svg { width: 14px !important; height: 14px !important; transform: scale(0.7) !important; }
+              .tox-icon svg, .tox-collection__item-icon svg { width: 16px !important; height: 16px !important; }
             `;
             document.head.appendChild(style);
           });
