@@ -128,16 +128,13 @@
   function handleSmaxMessage(event) {
     try {
       // Log incoming message for debugging
-      console.log('Received message:', event.data);
 
       if (typeof event.data === 'object' && event.data.name === '__SM_FORM_CUSTOMER') {
-        console.log('Received customer data from SMAX:', event.data?.data?.customer);
         if (event.data?.data?.customer) {
           const customer = event.data.data.customer;
           // Set storage key based on customer id
           if (customer.id) {
             formStorageKey = STORAGE_PREFIX + customer.id;
-            console.log('Set storage key:', formStorageKey);
             handleCustomerDataChange(customer);
           }
         }
@@ -148,7 +145,6 @@
   }
 
   function handleCustomerDataChange(newCustomerData) {
-    console.log('Processing customer data:', newCustomerData);
     
     // Validate required fields
     if (!newCustomerData.id) {
@@ -164,7 +160,6 @@
 
     // If we have stored data, use it as base
     if (storedData) {
-      console.log('Using stored data as base');
       mergedData = { ...mergedData, ...storedData };
     }
 
