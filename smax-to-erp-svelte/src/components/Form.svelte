@@ -408,15 +408,14 @@
   function handleResponse(response) {
     console.log('Handling response:', response);
     
-    // Check if response is an array and has at least one item
-    if (Array.isArray(response) && response.length > 0) {
-      const firstResponse = response[0];
-      console.log('Processing response item:', firstResponse);
+    // Handle single object response
+    if (response && typeof response === 'object') {
+      console.log('Processing response:', response);
       
-      if (firstResponse.success === true && firstResponse.data?.code) {
-        console.log('Found success response with code:', firstResponse.data.code);
+      if (response.success === true && response.data?.code) {
+        console.log('Found success response with code:', response.data.code);
         // Extract the numeric part from the code (e.g., "13428" from "LU13428")
-        const codeMatch = firstResponse.data.code.match(/LU(\d+)/);
+        const codeMatch = response.data.code.match(/LU(\d+)/);
         console.log('Code match result:', codeMatch);
         
         if (codeMatch && codeMatch[1]) {
@@ -445,14 +444,14 @@
           return;
         }
         
-        console.log('No lead ID found in code:', firstResponse.data.code);
-        showSuccess(`Đã thêm lead thành công: ${firstResponse.data.code}`);
+        console.log('No lead ID found in code:', response.data.code);
+        showSuccess(`Đã thêm lead thành công: ${response.data.code}`);
         return;
       }
       
-      if (firstResponse.message) {
-        console.log('Showing message from response:', firstResponse.message);
-        showSuccess(firstResponse.message);
+      if (response.message) {
+        console.log('Showing message from response:', response.message);
+        showSuccess(response.message);
         return;
       }
     }
