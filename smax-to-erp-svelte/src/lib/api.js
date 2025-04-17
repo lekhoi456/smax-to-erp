@@ -1,4 +1,8 @@
 const WEBHOOK_URL = 'https://n8n.nucuoimekong.com/webhook/smax-to-erp';
+const NOCODB_API_URL = 'https://nocodb.mykdigi.com/api/v2/tables/meptiucn6e8bsj2/records';
+const NOCODB_TOKEN = '0mr-zizuLunUdT4ZslPAQfT1du-gguqRGZrU2RS4';
+const ERP_API_URL = 'https://erp.nucuoimekong.vn/api/v1/leads';
+const ERP_API_TOKEN = 'W45PJABnxYXd7PPVPrbdgGwrUENYBL4S35ttutP_1699315050';
 
 /**
  * Create a new lead in the ERP system
@@ -98,4 +102,55 @@ export function formatLeadData(formData) {
     pic: formData.pic,
     ticket_description: formData.ticket_description
   };
+}
+
+/**
+ * Get leads by SMAX ID from NocoDB
+ * @param {string} smaxId - The SMAX ID to search for
+ * @returns {Promise<Array>} - Array of lead records
+ */
+export async function getLeadsBySmaxId(smaxId) {
+  try {
+    const response = await fetch(`${NOCODB_API_URL}?viewId=vw8qpktzg3g4qana&where=(smax_%20id,eq,${smaxId})&limit=25&shuffle=0&offset=0`, {
+      headers: {
+        'accept': 'application/json',
+        'xc-token': NOCODB_TOKEN
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.list || [];
+  } catch (error) {
+    console.error('Error fetching leads from NocoDB:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get lead details from ERP by lead code
+ * @param {string} leadCode - The lead code (e.g. LU13446)
+ * @returns {Promise<Object>} - Lead details
+ */
+export async function getLeadFromERP(leadCode) {
+  try {
+    const response = await fetch(`${ERP_API_URL}?api_token=${ERP_API_TOKEN}&code=${leadCode}`, {
+      headers: {
+        'accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.data?.[0] || null;
+  } catch (error) {
+    console.error('Error fetching lead from ERP:', error);
+    throw error;
+  }
 } 
