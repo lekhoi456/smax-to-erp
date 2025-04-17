@@ -49,8 +49,24 @@ export async function createLead(leadData) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
-    console.log('Webhook response:', data);
+    const rawData = await response.text();
+    console.log('Raw response text:', rawData);
+    
+    let data;
+    try {
+      data = JSON.parse(rawData);
+      console.log('Parsed response data:', data);
+    } catch (e) {
+      console.error('Error parsing response:', e);
+      throw new Error('Invalid JSON response from server');
+    }
+
+    // If data is wrapped in an array, take the first item
+    if (Array.isArray(data)) {
+      console.log('Response is an array, taking first item');
+      return data[0];
+    }
+
     return data;
   } catch (error) {
     console.error('Error creating lead:', error);

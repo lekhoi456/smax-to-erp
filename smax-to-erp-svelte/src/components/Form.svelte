@@ -319,7 +319,6 @@
     if (!validateForm()) return;
     
     isLoading = true;
-    let response = null;
 
     try {
       // Set a timeout of 30 seconds
@@ -329,20 +328,62 @@
       });
 
       // Create lead with timeout
-      response = await Promise.race([
+      const response = await Promise.race([
         createLead(formData),
         timeoutPromise
       ]);
+
+      console.log('Full response structure:', JSON.stringify(response, null, 2));
 
       if (!response) {
         throw new Error('No response received');
       }
 
-      // Process response and show success message
-      handleResponse(response);
+      // Check if response is wrapped in an array
+      const responseData = Array.isArray(response) ? response[0] : response;
+      console.log('Processing response data:', responseData);
+
+      if (responseData.success === true && responseData.data && responseData.data.code) {
+        console.log('Found code in response:', responseData.data.code);
+        const codeMatch = responseData.data.code.match(/LU(\d+)/);
+        console.log('Code match result:', codeMatch);
+        
+        if (codeMatch && codeMatch[1]) {
+          const leadId = codeMatch[1];
+          console.log('Successfully extracted lead ID:', leadId);
+          showSuccess(`Đã thêm lead <a href="https://erp.nucuoimekong.vn/admin/lead/${leadId}/show" target="_blank">#${leadId}</a>`);
+          
+          // Clear form storage after successful submission
+          if (formStorageKey) {
+            localStorage.removeItem(formStorageKey);
+          }
+          
+          // Reset form data to defaults
+          formData = {
+            ...formData,
+            ticket_name: '',
+            ticket_description: '',
+            ticket_priority: 'normal',
+            departure_date: formatDate(addDays(new Date(), 1)),
+            return_date: formatDate(addDays(new Date(), 2)),
+            adult: '1',
+            children: '0'
+          };
+        } else {
+          console.log('Could not extract lead ID from code');
+          showSuccess(`Đã thêm lead thành công: ${responseData.data.code}`);
+        }
+      } else {
+        console.log('Response structure not as expected:', responseData);
+        if (responseData.message) {
+          showSuccess(responseData.message);
+        } else {
+          showSuccess('Yêu cầu đã được gửi thành công. Vui lòng kiểm tra trong hệ thống ERP.');
+        }
+      }
 
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error in handleSubmit:', error);
       if (error.name === 'AbortError' || error.message === 'Request timed out') {
         showError('Máy chủ ERP đang xử lý quá lâu. Vui lòng kiểm tra sau vài phút.');
       } else {
@@ -403,61 +444,6 @@
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
-  }
-  
-  function handleResponse(response) {
-    console.log('Handling response:', response);
-    
-    // Handle single object response
-    if (response && typeof response === 'object') {
-      console.log('Processing response:', response);
-      
-      if (response.success === true && response.data?.code) {
-        console.log('Found success response with code:', response.data.code);
-        // Extract the numeric part from the code (e.g., "13428" from "LU13428")
-        const codeMatch = response.data.code.match(/LU(\d+)/);
-        console.log('Code match result:', codeMatch);
-        
-        if (codeMatch && codeMatch[1]) {
-          const leadId = codeMatch[1];
-          console.log('Extracted lead ID:', leadId);
-          const successMessage = `Đã thêm lead <a href="https://erp.nucuoimekong.vn/admin/lead/${leadId}/show" target="_blank">#${leadId}</a>`;
-          console.log('Showing success message with link:', successMessage);
-          showSuccess(successMessage);
-          
-          // Clear form storage after successful submission
-          if (formStorageKey) {
-            localStorage.removeItem(formStorageKey);
-          }
-          
-          // Reset form data to defaults
-          formData = {
-            ...formData,
-            ticket_name: '',
-            ticket_description: '',
-            ticket_priority: 'normal',
-            departure_date: formatDate(addDays(new Date(), 1)),
-            return_date: formatDate(addDays(new Date(), 2)),
-            adult: '1',
-            children: '0'
-          };
-          return;
-        }
-        
-        console.log('No lead ID found in code:', response.data.code);
-        showSuccess(`Đã thêm lead thành công: ${response.data.code}`);
-        return;
-      }
-      
-      if (response.message) {
-        console.log('Showing message from response:', response.message);
-        showSuccess(response.message);
-        return;
-      }
-    }
-    
-    console.log('No valid response format found');
-    showSuccess('Yêu cầu đã được gửi thành công. Vui lòng kiểm tra trong hệ thống ERP.');
   }
   
   function showSuccess(message) {
