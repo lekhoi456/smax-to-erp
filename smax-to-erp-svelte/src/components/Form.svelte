@@ -319,15 +319,35 @@
     if (!validateForm()) return;
     
     isLoading = true;
+    let response = null;
+
     try {
-      const response = await createLead(formData);
-      handleResponse(response);
-      // Clear storage after successful submission
-      if (formStorageKey) {
-        localStorage.removeItem(formStorageKey);
+      // Set a timeout of 30 seconds
+      const timeoutDuration = 30000;
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timed out')), timeoutDuration);
+      });
+
+      // Create lead with timeout
+      response = await Promise.race([
+        createLead(formData),
+        timeoutPromise
+      ]);
+
+      if (!response) {
+        throw new Error('No response received');
       }
+
+      // Process response and show success message
+      handleResponse(response);
+
     } catch (error) {
-      handleError(error);
+      console.error('Error:', error);
+      if (error.name === 'AbortError' || error.message === 'Request timed out') {
+        showError('Máy chủ ERP đang xử lý quá lâu. Vui lòng kiểm tra sau vài phút.');
+      } else {
+        showError('Không thể kết nối đến máy chủ ERP. Vui lòng thử lại.');
+      }
     } finally {
       isLoading = false;
     }
@@ -429,15 +449,6 @@
     }
   }
   
-  function handleError(error) {
-    console.error('Error:', error);
-    if (error.name === 'AbortError') {
-      showError('Máy chủ ERP đang xử lý quá lâu. Vui lòng kiểm tra sau vài phút.');
-    } else {
-      showError('Không thể kết nối đến máy chủ ERP. Vui lòng thử lại.');
-    }
-  }
-  
   function showSuccess(message) {
     const successContainer = document.getElementById('success-container');
     const successMessage = document.getElementById('success-message');
@@ -453,6 +464,11 @@
     if (errorContainer && errorMessage) {
       errorContainer.style.display = 'block';
       errorMessage.textContent = message;
+      
+      // Hide error after 5 seconds
+      setTimeout(() => {
+        errorContainer.style.display = 'none';
+      }, 5000);
     }
   }
 
