@@ -39,24 +39,74 @@
   let editor;
   let editorContent;
 
-  onMount(() => {
+  async function initializeDatepickers() {
+    try {
+      // Wait for jQuery to be available
+      if (!window.$) {
+        console.error('jQuery is not loaded');
+        return;
+      }
+
+      const $ = window.$;
+      const datepickerInputs = document.querySelectorAll('.datepicker');
+      
+      datepickerInputs.forEach(input => {
+        try {
+          $(input).datepicker({
+            format: 'dd/mm/yyyy',
+            autoclose: true,
+            todayHighlight: true,
+            language: 'vi',
+            orientation: 'bottom auto',
+            container: input.parentElement // Add this to ensure proper positioning
+          }).on('changeDate', (e) => {
+            const fieldName = input.getAttribute('name');
+            if (fieldName) {
+              const date = $(input).datepicker('getFormattedDate');
+              formData[fieldName] = date;
+              saveFormToStorage();
+            }
+          });
+
+          // Set initial values if they exist
+          if (formData[input.getAttribute('name')]) {
+            $(input).datepicker('update', formData[input.getAttribute('name')]);
+          }
+        } catch (err) {
+          console.error('Error initializing individual datepicker:', err);
+        }
+      });
+    } catch (error) {
+      console.error('Error in initializeDatepickers:', error);
+    }
+  }
+
+  onMount(async () => {
     // Listen for SMAX messages as soon as component mounts
     window.addEventListener('message', handleSmaxMessage);
     
     // Request data from SMAX immediately
     requestSmaxData();
 
-    const loaded = loadExternalLibraries();
+    // Load external libraries first
+    const loaded = await loadExternalLibraries();
     if (!loaded) {
       console.error('Failed to load external libraries');
       return;
     }
 
+    // Initialize components after libraries are loaded
+    await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to ensure libraries are ready
     initializeDatepickers();
     initializeEditor();
 
     return () => {
       window.removeEventListener('message', handleSmaxMessage);
+      // Cleanup datepickers
+      const $ = window.$;
+      if ($) {
+        $('.datepicker').datepicker('destroy');
+      }
     };
   });
 
@@ -83,7 +133,13 @@
       if (typeof event.data === 'object' && event.data.name === '__SM_FORM_CUSTOMER') {
         console.log('Received customer data from SMAX:', event.data?.data?.customer);
         if (event.data?.data?.customer) {
-          handleCustomerDataChange(event.data.data.customer);
+          const customer = event.data.data.customer;
+          // Set storage key based on customer id
+          if (customer.id) {
+            formStorageKey = STORAGE_PREFIX + customer.id;
+            console.log('Set storage key:', formStorageKey);
+          }
+          handleCustomerDataChange(customer);
         }
       }
     } catch (error) {
@@ -95,14 +151,11 @@
     console.log('Processing customer data:', newCustomerData);
     
     // Validate required fields
-    if (!newCustomerData.page_pid) {
-      console.warn('Missing page_pid in customer data');
+    if (!newCustomerData.id) {
+      console.warn('Missing id in customer data');
       return;
     }
 
-    // Set storage key based on page_pid
-    formStorageKey = STORAGE_PREFIX + newCustomerData.page_pid;
-    
     // Always update essential data from SMAX
     const smaxData = {
       id: newCustomerData.id || '',
@@ -119,6 +172,7 @@
 
     // Try to restore data from storage
     const storedData = loadFormFromStorage();
+    console.log('Loaded stored data:', storedData);
     
     if (storedData) {
       // If we have stored data, merge it with SMAX data
@@ -131,8 +185,8 @@
     } else {
       // If no stored data, use SMAX data with default values
       formData = {
-        ...formData,
-        ...smaxData,
+        ...formData, // Keep default values
+        ...smaxData, // Override with SMAX data
         departure_date: formatDate(addDays(new Date(), 1)),
         return_date: formatDate(addDays(new Date(), 2))
       };
@@ -143,40 +197,51 @@
     saveFormToStorage();
   }
 
+  // Save form data to localStorage
+  function saveFormToStorage() {
+    if (!formStorageKey) {
+      console.warn('No storage key available, cannot save form data');
+      return;
+    }
+    
+    try {
+      const dataToSave = { ...formData };
+      console.log('Saving to localStorage:', formStorageKey, dataToSave);
+      localStorage.setItem(formStorageKey, JSON.stringify(dataToSave));
+    } catch (error) {
+      console.error('Error saving form data to localStorage:', error);
+    }
+  }
+
+  // Load form data from localStorage
+  function loadFormFromStorage() {
+    if (!formStorageKey) {
+      console.warn('No storage key available, cannot load form data');
+      return null;
+    }
+    
+    try {
+      const storedData = localStorage.getItem(formStorageKey);
+      if (!storedData) {
+        console.log('No stored data found for key:', formStorageKey);
+        return null;
+      }
+      
+      const parsedData = JSON.parse(storedData);
+      console.log('Loaded from localStorage:', parsedData);
+      return parsedData;
+    } catch (error) {
+      console.error('Error loading form data from localStorage:', error);
+      return null;
+    }
+  }
+
   // Watch for changes in formData and save to localStorage
   $: if (formStorageKey && formData) {
+    console.log('formData changed, saving to localStorage');
     saveFormToStorage();
   }
 
-  function initializeDatepickers() {
-    try {
-      const datepickerInputs = document.querySelectorAll('.datepicker');
-      datepickerInputs.forEach(input => {
-        window.$(input).datepicker({
-          format: 'dd/mm/yyyy',
-          autoclose: true,
-          todayHighlight: true,
-          language: 'vi',
-          orientation: 'bottom auto'
-        }).on('changeDate', (e) => {
-          const fieldName = input.getAttribute('name');
-          if (fieldName) {
-            const date = window.$(input).datepicker('getFormattedDate');
-            formData[fieldName] = date;
-            saveFormToStorage(); // Save when date changes
-          }
-        });
-
-        // Set initial values if they exist
-        if (formData[input.getAttribute('name')]) {
-          window.$(input).datepicker('update', formData[input.getAttribute('name')]);
-        }
-      });
-    } catch (error) {
-      console.error('Error initializing datepickers:', error);
-    }
-  }
-  
   function initializeEditor() {
     const editor = document.getElementById('ticket_description');
     const toolbar = document.getElementById('editor-toolbar');
@@ -355,31 +420,6 @@
     if (errorContainer && errorMessage) {
       errorContainer.style.display = 'block';
       errorMessage.textContent = message;
-    }
-  }
-
-  // Save form data to localStorage
-  function saveFormToStorage() {
-    if (!formStorageKey) return;
-    
-    try {
-      const dataToSave = { ...formData };
-      localStorage.setItem(formStorageKey, JSON.stringify(dataToSave));
-    } catch (error) {
-      console.error('Error saving form data to localStorage:', error);
-    }
-  }
-
-  // Load form data from localStorage
-  function loadFormFromStorage() {
-    if (!formStorageKey) return null;
-    
-    try {
-      const storedData = localStorage.getItem(formStorageKey);
-      return storedData ? JSON.parse(storedData) : null;
-    } catch (error) {
-      console.error('Error loading form data from localStorage:', error);
-      return null;
     }
   }
 
