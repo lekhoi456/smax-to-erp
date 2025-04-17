@@ -6,6 +6,7 @@
   export let customerData;
   
   const STORAGE_PREFIX = 'smax_erp_form_';
+  const STORAGE_EXPIRY_DAYS = 7;
   let formStorageKey = '';
   
   let formData = {
@@ -81,22 +82,53 @@
     }
   }
 
-  onMount(async () => {
-    // Listen for SMAX messages as soon as component mounts
+  // Clean up expired localStorage items
+  function cleanupStorage() {
+    try {
+      const now = new Date().getTime();
+      
+      // Get all keys from localStorage that start with our prefix
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(STORAGE_PREFIX)) {
+          try {
+            const item = localStorage.getItem(key);
+            if (!item) return;
+            
+            const data = JSON.parse(item);
+            
+            // Check if item has timestamp and is expired
+            if (data._timestamp && (now - data._timestamp) > (STORAGE_EXPIRY_DAYS * 24 * 60 * 60 * 1000)) {
+              localStorage.removeItem(key);
+            }
+          } catch (e) {
+            // If item is invalid, remove it
+            localStorage.removeItem(key);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error cleaning up storage:', error);
+    }
+  }
+
+  onMount(() => {
+    // Clean up expired items when component mounts
+    cleanupStorage();
+    
+    // Listen for SMAX messages
     window.addEventListener('message', handleSmaxMessage);
     
     // Request data from SMAX immediately
     requestSmaxData();
 
     // Load external libraries first
-    const loaded = await loadExternalLibraries();
+    const loaded = loadExternalLibraries();
     if (!loaded) {
       console.error('Failed to load external libraries');
       return;
     }
 
     // Initialize components after libraries are loaded
-    await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to ensure libraries are ready
     initializeDatepickers();
     initializeEditor();
 
@@ -194,37 +226,42 @@
     saveFormToStorage();
   }
 
-  // Save form data to localStorage
+  // Save form data to localStorage with timestamp
   function saveFormToStorage() {
-    if (!formStorageKey) {
-      console.warn('No storage key available, cannot save form data');
-      return;
-    }
+    if (!formStorageKey) return;
     
     try {
-      const dataToSave = { ...formData };
+      const dataToSave = {
+        ...formData,
+        _timestamp: new Date().getTime()
+      };
       localStorage.setItem(formStorageKey, JSON.stringify(dataToSave));
     } catch (error) {
       console.error('Error saving form data to localStorage:', error);
     }
   }
 
-  // Load form data from localStorage
+  // Load form data from localStorage and check expiry
   function loadFormFromStorage() {
-    if (!formStorageKey) {
-      console.warn('No storage key available, cannot load form data');
-      return null;
-    }
+    if (!formStorageKey) return null;
     
     try {
       const storedData = localStorage.getItem(formStorageKey);
-      if (!storedData) {
-        console.log('No stored data found for key:', formStorageKey);
+      if (!storedData) return null;
+      
+      const parsedData = JSON.parse(storedData);
+      
+      // Check if data is expired
+      const now = new Date().getTime();
+      if (parsedData._timestamp && (now - parsedData._timestamp) > (STORAGE_EXPIRY_DAYS * 24 * 60 * 60 * 1000)) {
+        localStorage.removeItem(formStorageKey);
         return null;
       }
       
-      const parsedData = JSON.parse(storedData);
-      return parsedData;
+      // Remove timestamp before returning
+      const { _timestamp, ...dataWithoutTimestamp } = parsedData;
+      return dataWithoutTimestamp;
+      
     } catch (error) {
       console.error('Error loading form data from localStorage:', error);
       return null;
