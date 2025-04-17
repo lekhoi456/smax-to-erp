@@ -21,8 +21,8 @@
     phone: '',
     email: '',
     address: '',
-    departure_date: formatDate(new Date()),
-    return_date: formatDate(addDays(new Date(), 3)),
+    departure_date: formatDate(addDays(new Date(), 1)),
+    return_date: formatDate(addDays(new Date(), 2)),
     adult: '1',
     children: '0',
     erp_id: '',
@@ -386,112 +386,112 @@
     <input type="hidden" bind:value={formData.page_pid}>
     <input type="hidden" bind:value={formData.picture}>
     
-    <!-- Customer Information Section -->
-    <div class="form-section-title">Thông tin khách hàng</div>
-    
-    <div class="mb-2">
-      <div class="input-group">
-        <span class="input-group-text">
-          <div class="avatar-circle">
-            {#if formData.picture}
-              <img src={formData.picture} alt="Avatar">
-            {:else}
-              <span class="avatar-placeholder"><i class="bi bi-person"></i></span>
-            {/if}
-          </div>
-        </span>
-        <input 
-          type="text" 
-          class="form-control" 
-          placeholder="Họ tên"
-          bind:value={formData.name}
-          on:input={() => handleInput('name', formData.name)}
-          class:error={errors.name}
-        >
-      </div>
-      {#if errors.name}
-        <div class="error-message">{errors.name}</div>
-      {/if}
-    </div>
-    
-    <div class="row mb-2">
-      <div class="col-6 col-small-12 mb-2">
+    <!-- Customer Information -->
+    <div class="form-section">
+      <div class="form-section-title">Thông tin khách hàng</div>
+      
+      <div class="form-group">
         <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+          <span class="input-group-text">
+            {#if formData.picture}
+              <img src={formData.picture} alt="Avatar" class="avatar">
+            {:else}
+              <i class="bi bi-person"></i>
+            {/if}
+          </span>
           <input 
             type="text" 
-            class="form-control datepicker" 
-            placeholder="Ngày sinh"
-            name="birthdate"
-            bind:value={formData.birthdate}
-          >
-        </div>
-      </div>
-      <div class="col-6 col-small-12 mb-2">
-        <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
-          <select class="form-control" bind:value={formData.gender}>
-            <option value="">Giới tính</option>
-            <option value="male">Nam</option>
-            <option value="female">Nữ</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    
-    <div class="row mb-2">
-      <div class="col-6 col-small-12 mb-2">
-        <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-phone"></i></span>
-          <input 
-            type="tel" 
             class="form-control" 
-            placeholder="Số điện thoại"
-            bind:value={formData.phone}
-            on:input={() => handleInput('phone', formData.phone)}
-            class:error={errors.phone}
+            placeholder="Họ tên"
+            bind:value={formData.name}
+            on:input={() => handleInput('name', formData.name)}
+            class:error={errors.name}
           >
         </div>
-        {#if errors.phone}
-          <div class="error-message">{errors.phone}</div>
+        {#if errors.name}
+          <div class="error-message">{errors.name}</div>
         {/if}
       </div>
-      <div class="col-6 col-small-12 mb-2">
+      
+      <div class="form-row">
+        <div class="form-group">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+            <input 
+              type="text" 
+              class="form-control datepicker" 
+              placeholder="Ngày sinh"
+              name="birthdate"
+              bind:value={formData.birthdate}
+            >
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
+            <select class="form-control" bind:value={formData.gender}>
+              <option value="">Giới tính</option>
+              <option value="male">Nam</option>
+              <option value="female">Nữ</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-phone"></i></span>
+            <input 
+              type="tel" 
+              class="form-control" 
+              placeholder="Số điện thoại"
+              bind:value={formData.phone}
+              on:input={() => handleInput('phone', formData.phone)}
+              class:error={errors.phone}
+            >
+          </div>
+          {#if errors.phone}
+            <div class="error-message">{errors.phone}</div>
+          {/if}
+        </div>
+        <div class="form-group">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input 
+              type="email" 
+              class="form-control" 
+              placeholder="Email"
+              bind:value={formData.email}
+              on:input={() => handleInput('email', formData.email)}
+              class:error={errors.email}
+            >
+          </div>
+          {#if errors.email}
+            <div class="error-message">{errors.email}</div>
+          {/if}
+        </div>
+      </div>
+      
+      <div class="form-group">
         <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+          <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
           <input 
-            type="email" 
+            type="text" 
             class="form-control" 
-            placeholder="Email"
-            bind:value={formData.email}
-            on:input={() => handleInput('email', formData.email)}
-            class:error={errors.email}
+            placeholder="Địa chỉ"
+            bind:value={formData.address}
           >
         </div>
-        {#if errors.email}
-          <div class="error-message">{errors.email}</div>
-        {/if}
       </div>
     </div>
     
-    <div class="mb-2">
-      <div class="input-group">
-        <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-        <input 
-          type="text" 
-          class="form-control" 
-          placeholder="Địa chỉ"
-          bind:value={formData.address}
-        >
-      </div>
-    </div>
-    
-    <!-- ERP Information Section -->
+    <!-- ERP Information -->
     <div class="form-section">
       <div class="form-section-title">Thông tin ERP</div>
       
-      <div class="row mb-2">
-        <div class="col-6 col-small-12 mb-2">
+      <div class="form-row">
+        <div class="form-group">
           <div class="input-group">
             <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
             <input 
@@ -503,7 +503,7 @@
             >
           </div>
         </div>
-        <div class="col-6 col-small-12 mb-2">
+        <div class="form-group">
           <div class="input-group">
             <span class="input-group-text"><i class="bi bi-calendar-x"></i></span>
             <input 
@@ -517,8 +517,8 @@
         </div>
       </div>
       
-      <div class="row mb-2">
-        <div class="col-6 col-small-12 mb-2">
+      <div class="form-row">
+        <div class="form-group">
           <div class="input-group">
             <span class="input-group-text"><i class="bi bi-people"></i></span>
             <input 
@@ -530,7 +530,7 @@
             >
           </div>
         </div>
-        <div class="col-6 col-small-12 mb-2">
+        <div class="form-group">
           <div class="input-group">
             <span class="input-group-text"><i class="bi bi-person-hearts"></i></span>
             <input 
@@ -544,54 +544,7 @@
         </div>
       </div>
       
-      <div class="row mb-2">
-        <div class="col-6 col-small-12 mb-2">
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-hash"></i></span>
-            <input 
-              type="text" 
-              class="form-control" 
-              placeholder="ID ERP"
-              bind:value={formData.erp_id}
-            >
-          </div>
-        </div>
-        <div class="col-6 col-small-12 mb-2">
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-fingerprint"></i></span>
-            <input 
-              type="text" 
-              class="form-control" 
-              placeholder="Unique ID"
-              bind:value={formData.erp_unique_id}
-            >
-          </div>
-        </div>
-      </div>
-      
-      <div class="row mb-2">
-        <div class="col-6 col-small-12 mb-2">
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-layers"></i></span>
-            <select class="form-control" bind:value={formData.type}>
-              <option value="">Loại lead</option>
-              <option value="1">Lead ghép</option>
-              <option value="2">Lead đoàn</option>
-            </select>
-          </div>
-        </div>
-        <div class="col-6 col-small-12 mb-2">
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-flag"></i></span>
-            <select class="form-control" bind:value={formData.ticket_priority}>
-              <option value="normal">Bình thường</option>
-              <option value="urgent">Khẩn cấp</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      
-      <div class="mb-2">
+      <div class="form-group">
         <div class="input-group">
           <span class="input-group-text"><i class="bi bi-ticket"></i></span>
           <input 
@@ -609,7 +562,6 @@
       </div>
       
       <div class="form-group">
-        <label for="ticket_description">Ticket Description</label>
         <div class="editor-container">
           <div class="editor-toolbar">
             <button type="button" class="editor-btn" data-command="bold" title="Bold">
@@ -634,16 +586,13 @@
           <div 
             class="editor-content" 
             contenteditable="true" 
-            data-placeholder="Enter ticket description..."
+            data-placeholder="Mô tả yêu cầu..."
             bind:innerHTML={formData.ticket_description}
           ></div>
         </div>
-        {#if errors.ticket_description}
-          <div class="invalid-feedback">{errors.ticket_description}</div>
-        {/if}
       </div>
       
-      <div class="mb-2">
+      <div class="form-group">
         <div class="input-group">
           <span class="input-group-text"><i class="bi bi-person-check"></i></span>
           <select 
@@ -671,27 +620,25 @@
       </div>
     </div>
     
-    <div class="d-grid gap-2 mt-3">
-      <button 
-        type="button" 
-        class="btn-success" 
-        on:click={handleSubmit} 
-        disabled={isLoading}
-      >
-        {#if isLoading}
-          <span class="loading"></span> Đang xử lý...
-        {:else}
-          Tạo Lead ERP
-        {/if}
-      </button>
-    </div>
+    <button 
+      type="button" 
+      class="submit-btn" 
+      on:click={handleSubmit} 
+      disabled={isLoading}
+    >
+      {#if isLoading}
+        <span class="loading"></span> Đang xử lý...
+      {:else}
+        Tạo Lead ERP
+      {/if}
+    </button>
   </form>
   
-  <div id="success-container" class="alert alert-success mt-3" style="display: none;">
+  <div id="success-container" class="alert alert-success" style="display: none;">
     <p id="success-message" class="mb-0"></p>
   </div>
   
-  <div id="error-container" class="alert alert-danger mt-3" style="display: none;">
+  <div id="error-container" class="alert alert-danger" style="display: none;">
     <p id="error-message" class="mb-0"></p>
   </div>
 </div>
@@ -702,95 +649,188 @@
     max-width: 400px;
     margin: 0 auto;
     background-color: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .row {
-    display: flex;
-    flex-wrap: wrap;
-    margin: 0 -5px;
-  }
-  
-  .col-6 {
-    flex: 0 0 50%;
-    max-width: 50%;
-    padding: 0 5px;
-  }
-  
-  :global(.alert) {
-    padding: 12px;
+    padding: 8px;
     border-radius: 4px;
-    margin-top: 12px;
   }
   
-  :global(.alert-success) {
+  .form-section {
+    margin-bottom: 12px;
+  }
+  
+  .form-section-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #495057;
+    font-size: 0.9rem;
+    padding-bottom: 4px;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  
+  .form-group {
+    flex: 1;
+    margin-bottom: 6px;
+  }
+  
+  .input-group {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+  }
+  
+  .input-group-text {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    color: #6c757d;
+    pointer-events: none;
+    background: #fff;
+  }
+  
+  .input-group .form-control {
+    padding-left: 44px;
+    width: 100%;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 6px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: transparent;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    position: relative;
+  }
+
+  .form-control::placeholder {
+    color: #6c757d;
+    opacity: 0.8;
+  }
+
+  .input-group:focus-within .form-control {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+    background: transparent;
+  }
+
+  .input-group:focus-within .input-group-text {
+    color: #0d6efd;
+    background: transparent;
+  }
+
+  .input-group i {
+    font-size: 0.9rem;
+  }
+
+  /* Error state */
+  .form-control.error {
+    border-color: #dc3545;
+  }
+
+  .input-group:focus-within .form-control.error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+  }
+
+  .input-group:focus-within .form-control.error + .input-group-text {
+    color: #dc3545;
+  }
+  
+  .error-message {
+    color: #dc3545;
+    font-size: 0.75rem;
+    margin-top: 2px;
+  }
+  
+  .submit-btn {
+    width: 100%;
+    padding: 8px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 8px;
+  }
+  
+  .submit-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .alert {
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+    font-size: 0.9rem;
+  }
+  
+  .alert-success {
     background-color: #d4edda;
     border-color: #c3e6cb;
     color: #155724;
   }
   
-  :global(.alert-danger) {
+  .alert-danger {
     background-color: #f8d7da;
     border-color: #f5c6cb;
     color: #721c24;
   }
   
-  :global(.me-2) {
-    margin-right: 8px;
-  }
-  
-  :global(.form-label) {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--text-color);
-  }
-
-  /* Editor container */
+  /* Editor styles */
   .editor-container {
-    border: 1px solid #ccc;
+    border: 1px solid #ced4da;
     border-radius: 4px;
     overflow: hidden;
+    max-height: 120px;
   }
-
+  
   .editor-toolbar {
-    padding: 8px;
+    padding: 4px;
     background-color: #f8f9fa;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #ced4da;
     display: flex;
-    gap: 5px;
+    gap: 3px;
   }
-
+  
   .editor-btn {
     background: none;
     border: none;
-    padding: 5px 10px;
+    padding: 3px 6px;
     cursor: pointer;
     border-radius: 4px;
     color: #6c757d;
+    font-size: 0.8rem;
   }
-
+  
   .editor-btn:hover {
     background-color: #e9ecef;
     color: #495057;
   }
-
+  
   .editor-content {
-    min-height: 200px;
-    padding: 12px;
+    min-height: 80px;
+    max-height: 80px;
+    padding: 6px;
     outline: none;
+    overflow-y: auto;
+    font-size: 0.9rem;
   }
-
+  
   .editor-content[data-placeholder]:empty:before {
     content: attr(data-placeholder);
     color: #6c757d;
     pointer-events: none;
-  }
-
-  .error-message {
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
   }
 </style> 
