@@ -158,7 +158,6 @@
 
     // First, try to load data from localStorage
     const storedData = loadFormFromStorage();
-    console.log('Loaded stored data:', storedData);
 
     // Start with default form data
     let mergedData = { ...formData };
@@ -195,7 +194,6 @@
       formData.return_date = formatDate(addDays(new Date(), 2));
     }
 
-    console.log('Final merged data:', formData);
     
     // Save the merged data to storage
     saveFormToStorage();
@@ -210,7 +208,6 @@
     
     try {
       const dataToSave = { ...formData };
-      console.log('Saving to localStorage:', formStorageKey, dataToSave);
       localStorage.setItem(formStorageKey, JSON.stringify(dataToSave));
     } catch (error) {
       console.error('Error saving form data to localStorage:', error);
@@ -232,7 +229,6 @@
       }
       
       const parsedData = JSON.parse(storedData);
-      console.log('Loaded from localStorage:', parsedData);
       return parsedData;
     } catch (error) {
       console.error('Error loading form data from localStorage:', error);
@@ -242,7 +238,6 @@
 
   // Watch for changes in formData and save to localStorage
   $: if (formStorageKey && formData) {
-    console.log('formData changed, saving to localStorage');
     saveFormToStorage();
   }
 
