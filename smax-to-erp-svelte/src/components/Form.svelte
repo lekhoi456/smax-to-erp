@@ -48,33 +48,42 @@
     // Set storage key based on page_pid
     formStorageKey = STORAGE_PREFIX + newCustomerData.page_pid;
     
-    // Try to restore data from storage first
+    // Always update essential data from SMAX
+    const smaxData = {
+      id: newCustomerData.id || '',
+      pid: newCustomerData.pid || '',
+      platform: newCustomerData.platform || '',
+      gid: newCustomerData.gid || '',
+      page_pid: newCustomerData.page_pid || '',
+      picture: newCustomerData.picture || '',
+      name: newCustomerData.name || '',
+      phone: newCustomerData.phone || '',
+      email: newCustomerData.email || '',
+      address: newCustomerData.address || ''
+    };
+
+    // Try to restore data from storage
     const storedData = loadFormFromStorage();
     
     if (storedData) {
-      // If we have stored data, use it
-      formData = { ...formData, ...storedData };
+      // If we have stored data, merge it with SMAX data
+      // SMAX data takes precedence for customer info
+      formData = {
+        ...storedData,
+        ...smaxData
+      };
     } else {
-      // If no stored data, use new customer data
+      // If no stored data, use SMAX data with default values
       formData = {
         ...formData,
-        id: newCustomerData.id || '',
-        pid: newCustomerData.pid || '',
-        platform: newCustomerData.platform || '',
-        gid: newCustomerData.gid || '',
-        page_pid: newCustomerData.page_pid || '',
-        picture: newCustomerData.picture || '',
-        name: newCustomerData.name || '',
-        phone: newCustomerData.phone || '',
-        email: newCustomerData.email || '',
-        address: newCustomerData.address || '',
+        ...smaxData,
         departure_date: formatDate(addDays(new Date(), 1)),
         return_date: formatDate(addDays(new Date(), 2))
       };
-      
-      // Save the new data to storage
-      saveFormToStorage();
     }
+    
+    // Save the merged data to storage
+    saveFormToStorage();
   }
 
   // Watch for changes in formData and save to localStorage
