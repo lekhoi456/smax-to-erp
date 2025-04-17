@@ -39,39 +39,49 @@
   let editor;
   let editorContent;
 
+  // Watch for customerData changes
+  $: if (customerData?.page_pid) {
+    handleCustomerDataChange(customerData);
+  }
+
+  function handleCustomerDataChange(newCustomerData) {
+    // Set storage key based on page_pid
+    formStorageKey = STORAGE_PREFIX + newCustomerData.page_pid;
+    
+    // Try to restore data from storage first
+    const storedData = loadFormFromStorage();
+    
+    if (storedData) {
+      // If we have stored data, use it
+      formData = { ...formData, ...storedData };
+    } else {
+      // If no stored data, use new customer data
+      formData = {
+        ...formData,
+        id: newCustomerData.id || '',
+        pid: newCustomerData.pid || '',
+        platform: newCustomerData.platform || '',
+        gid: newCustomerData.gid || '',
+        page_pid: newCustomerData.page_pid || '',
+        picture: newCustomerData.picture || '',
+        name: newCustomerData.name || '',
+        phone: newCustomerData.phone || '',
+        email: newCustomerData.email || '',
+        address: newCustomerData.address || '',
+        departure_date: formatDate(addDays(new Date(), 1)),
+        return_date: formatDate(addDays(new Date(), 2))
+      };
+      
+      // Save the new data to storage
+      saveFormToStorage();
+    }
+  }
+
   // Watch for changes in formData and save to localStorage
   $: if (formStorageKey && formData) {
     saveFormToStorage();
   }
 
-  // Watch for customerData changes
-  $: if (customerData) {
-    // Set storage key based on page_pid
-    if (customerData.page_pid) {
-      formStorageKey = STORAGE_PREFIX + customerData.page_pid;
-      // Try to restore data from storage first
-      const storedData = loadFormFromStorage();
-      if (storedData) {
-        formData = { ...formData, ...storedData };
-      } else {
-        // If no stored data, use customerData
-        formData = {
-          ...formData,
-          id: customerData.id || '',
-          pid: customerData.pid || '',
-          platform: customerData.platform || '',
-          gid: customerData.gid || '',
-          page_pid: customerData.page_pid || '',
-          picture: customerData.picture || '',
-          name: customerData.name || '',
-          phone: customerData.phone || '',
-          email: customerData.email || '',
-          address: customerData.address || ''
-        };
-      }
-    }
-  }
-  
   onMount(async () => {
     const loaded = await loadExternalLibraries();
     if (!loaded) {
@@ -295,6 +305,8 @@
 
   // Save form data to localStorage
   function saveFormToStorage() {
+    if (!formStorageKey) return;
+    
     try {
       const dataToSave = { ...formData };
       localStorage.setItem(formStorageKey, JSON.stringify(dataToSave));
@@ -305,6 +317,8 @@
 
   // Load form data from localStorage
   function loadFormFromStorage() {
+    if (!formStorageKey) return null;
+    
     try {
       const storedData = localStorage.getItem(formStorageKey);
       return storedData ? JSON.parse(storedData) : null;
@@ -694,6 +708,13 @@
     color: #6c757d;
     pointer-events: none;
     background: #fff;
+  }
+
+  .input-group-text img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
   }
   
   .input-group .form-control {
