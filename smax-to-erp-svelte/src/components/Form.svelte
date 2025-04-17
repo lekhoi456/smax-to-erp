@@ -111,7 +111,7 @@
     }
   }
 
-  onMount(() => {
+  onMount(async () => {
     // Clean up expired items when component mounts
     cleanupStorage();
     
@@ -122,12 +122,15 @@
     requestSmaxData();
 
     // Load external libraries first
-    const loaded = loadExternalLibraries();
+    const loaded = await loadExternalLibraries();
     if (!loaded) {
       console.error('Failed to load external libraries');
       return;
     }
 
+    // Small delay to ensure libraries are ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     // Initialize components after libraries are loaded
     initializeDatepickers();
     initializeEditor();
