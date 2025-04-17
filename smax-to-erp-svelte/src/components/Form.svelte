@@ -37,6 +37,7 @@
   let errors = {};
   let isLoading = false;
   let editor;
+  let editorContent;
 
   // Watch for changes in formData and save to localStorage
   $: if (formStorageKey && formData) {
@@ -72,22 +73,14 @@
   }
   
   onMount(async () => {
-    // Load external libraries first
     const loaded = await loadExternalLibraries();
     if (!loaded) {
       console.error('Failed to load external libraries');
       return;
     }
 
-    // Initialize components after libraries are loaded
     initializeDatepickers();
-    initializeTinyMCE();
-
-    return () => {
-      if (window.tinymce && tinymce.get('ticket_description')) {
-        tinymce.get('ticket_description').remove();
-      }
-    };
+    initializeEditor();
   });
   
   function initializeDatepickers() {
@@ -119,59 +112,73 @@
     }
   }
   
-  function initializeTinyMCE() {
-    try {
-      if (!window.tinymce) {
-        console.error('TinyMCE not loaded');
-        return;
+  function initializeEditor() {
+    const editor = document.getElementById('ticket_description');
+    const toolbar = document.getElementById('editor-toolbar');
+
+    if (!editor || !toolbar) return;
+
+    // Set initial content if exists
+    if (formData.ticket_description) {
+      editor.innerHTML = formData.ticket_description;
+    }
+
+    // Update formData when content changes
+    editor.addEventListener('input', () => {
+      formData.ticket_description = editor.innerHTML;
+    });
+
+    // Handle toolbar button clicks
+    toolbar.addEventListener('click', (e) => {
+      const button = e.target.closest('.editor-btn');
+      if (!button) return;
+
+      const command = button.dataset.command;
+      
+      switch (command) {
+        case 'bold':
+        case 'italic':
+        case 'underline':
+          document.execCommand(command, false);
+          break;
+        case 'ul':
+          document.execCommand('insertUnorderedList', false);
+          break;
+        case 'ol':
+          document.execCommand('insertOrderedList', false);
+          break;
+        case 'link':
+          const url = prompt('Enter URL:');
+          if (url) {
+            document.execCommand('createLink', false, url);
+          }
+          break;
       }
 
-      window.tinymce.init({
-        selector: '#ticket_description',
-        height: 150,
-        menubar: false,
-        plugins: 'link lists table',
-        toolbar: 'undo redo | bold italic | alignleft aligncenter | bullist numlist | link',
-        content_style: 'body { font-family: "Roboto", sans-serif; font-size: 13px; }',
-        branding: false,
-        promotion: false,
-        statusbar: false,
-        resize: false,
-        toolbar_location: 'top',
-        forced_root_block: 'p',
-        toolbar_mode: 'wrap',
-        toolbar_sticky: false,
-        icons: 'material',
-        skin: 'oxide',
-        content_css: 'default',
-        setup: function(editor) {
-          editor.on('change', function() {
-            formData.ticket_description = editor.getContent();
-            saveFormToStorage();
-          });
-          
-          editor.on('init', function() {
-            if (formData.ticket_description) {
-              editor.setContent(formData.ticket_description);
-            }
-            
-            const style = document.createElement('style');
-            style.innerHTML = `
-              .tox .tox-toolbar__group { padding: 0 !important; margin: 0 !important; }
-              .tox .tox-tbtn { height: 28px !important; width: 28px !important; margin: 0 1px !important; padding: 2px !important; }
-              .tox .tox-tbtn svg { width: 16px !important; height: 16px !important; }
-              .tox .tox-toolbar { padding: 0 !important; }
-              .tox .tox-edit-area { padding: 0 !important; }
-              .tox .tox-tbtn--enabled, .tox .tox-tbtn:hover { background: #e3e3e3 !important; }
-              .tox-icon svg, .tox-collection__item-icon svg { width: 16px !important; height: 16px !important; }
-            `;
-            document.head.appendChild(style);
-          });
-        }
-      });
-    } catch (error) {
-      console.error('Error initializing TinyMCE:', error);
-    }
+      // Update active state
+      if (['bold', 'italic', 'underline'].includes(command)) {
+        button.classList.toggle('active', document.queryCommandState(command));
+      }
+
+      editor.focus();
+    });
+
+    // Update button states on selection change
+    editor.addEventListener('keyup', updateToolbarState);
+    editor.addEventListener('mouseup', updateToolbarState);
+    editor.addEventListener('selectionchange', updateToolbarState);
+  }
+  
+  function updateToolbarState() {
+    const toolbar = document.getElementById('editor-toolbar');
+    if (!toolbar) return;
+
+    ['bold', 'italic', 'underline'].forEach(command => {
+      const button = toolbar.querySelector(`[data-command="${command}"]`);
+      if (button) {
+        button.classList.toggle('active', document.queryCommandState(command));
+      }
+    });
   }
   
   async function handleSubmit() {
@@ -312,6 +319,61 @@
     formData[field] = value;
     saveFormToStorage();
   }
+
+  function execCommand(command) {
+    document.execCommand(command, false, null);
+  }
+
+  function handleEditorCommand(event) {
+    const button = event.target.closest('.editor-btn');
+    if (!button) return;
+
+    const command = button.dataset.command;
+    
+    if (command === 'createLink') {
+      const url = prompt('Enter the URL:');
+      if (url) {
+        document.execCommand('createLink', false, url);
+      }
+    } else {
+      execCommand(command);
+    }
+    
+    // Update formData
+    formData.ticket_description = editorContent.innerHTML;
+  }
+
+  onMount(() => {
+    editorContent = document.querySelector('.editor-content');
+    
+    // Add click handler for toolbar buttons
+    const toolbar = document.querySelector('.editor-toolbar');
+    toolbar.addEventListener('click', handleEditorCommand);
+    
+    // Handle placeholder text
+    editorContent.addEventListener('focus', () => {
+      if (editorContent.innerHTML === '') {
+        editorContent.innerHTML = '';
+      }
+    });
+    
+    editorContent.addEventListener('blur', () => {
+      if (editorContent.innerHTML === '') {
+        editorContent.innerHTML = '';
+      }
+    });
+    
+    // Update formData when content changes
+    editorContent.addEventListener('input', () => {
+      formData.ticket_description = editorContent.innerHTML;
+    });
+    
+    return () => {
+      // Cleanup event listeners
+      toolbar.removeEventListener('click', handleEditorCommand);
+      editorContent.removeEventListener('input', () => {});
+    };
+  });
 </script>
 
 <div class="form-container">
@@ -546,14 +608,39 @@
         {/if}
       </div>
       
-      <div class="mb-3">
-        <label class="form-label">
-          <i class="bi bi-card-text me-2"></i>Mô tả yêu cầu
-        </label>
-        <textarea 
-          id="ticket_description"
-          bind:value={formData.ticket_description}
-        ></textarea>
+      <div class="form-group">
+        <label for="ticket_description">Ticket Description</label>
+        <div class="editor-container">
+          <div class="editor-toolbar">
+            <button type="button" class="editor-btn" data-command="bold" title="Bold">
+              <i class="fas fa-bold"></i>
+            </button>
+            <button type="button" class="editor-btn" data-command="italic" title="Italic">
+              <i class="fas fa-italic"></i>
+            </button>
+            <button type="button" class="editor-btn" data-command="underline" title="Underline">
+              <i class="fas fa-underline"></i>
+            </button>
+            <button type="button" class="editor-btn" data-command="insertUnorderedList" title="Bullet List">
+              <i class="fas fa-list-ul"></i>
+            </button>
+            <button type="button" class="editor-btn" data-command="insertOrderedList" title="Numbered List">
+              <i class="fas fa-list-ol"></i>
+            </button>
+            <button type="button" class="editor-btn" data-command="createLink" title="Insert Link">
+              <i class="fas fa-link"></i>
+            </button>
+          </div>
+          <div 
+            class="editor-content" 
+            contenteditable="true" 
+            data-placeholder="Enter ticket description..."
+            bind:innerHTML={formData.ticket_description}
+          ></div>
+        </div>
+        {#if errors.ticket_description}
+          <div class="invalid-feedback">{errors.ticket_description}</div>
+        {/if}
       </div>
       
       <div class="mb-2">
@@ -658,5 +745,52 @@
     display: block;
     margin-bottom: 8px;
     color: var(--text-color);
+  }
+
+  /* Editor container */
+  .editor-container {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .editor-toolbar {
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    gap: 5px;
+  }
+
+  .editor-btn {
+    background: none;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    color: #6c757d;
+  }
+
+  .editor-btn:hover {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+
+  .editor-content {
+    min-height: 200px;
+    padding: 12px;
+    outline: none;
+  }
+
+  .editor-content[data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    color: #6c757d;
+    pointer-events: none;
+  }
+
+  .error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
   }
 </style> 
