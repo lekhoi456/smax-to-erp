@@ -39,12 +39,67 @@
   let editor;
   let editorContent;
 
-  // Watch for customerData changes
-  $: if (customerData?.page_pid) {
-    handleCustomerDataChange(customerData);
+  onMount(() => {
+    // Listen for SMAX messages as soon as component mounts
+    window.addEventListener('message', handleSmaxMessage);
+    
+    // Request data from SMAX immediately
+    requestSmaxData();
+
+    const loaded = loadExternalLibraries();
+    if (!loaded) {
+      console.error('Failed to load external libraries');
+      return;
+    }
+
+    initializeDatepickers();
+    initializeEditor();
+
+    return () => {
+      window.removeEventListener('message', handleSmaxMessage);
+    };
+  });
+
+  function requestSmaxData() {
+    try {
+      const integrationId = window.location.href.split('=')[1];
+      window.parent.postMessage({
+        name: '__SM_FORM_CUSTOMER',
+        data: {
+          integration_id: integrationId,
+        }
+      }, '*');
+      console.log('Requested data from SMAX with integration_id:', integrationId);
+    } catch (error) {
+      console.error('Error requesting data from SMAX:', error);
+    }
+  }
+
+  function handleSmaxMessage(event) {
+    try {
+      // Log incoming message for debugging
+      console.log('Received message:', event.data);
+
+      if (typeof event.data === 'object' && event.data.name === '__SM_FORM_CUSTOMER') {
+        console.log('Received customer data from SMAX:', event.data?.data?.customer);
+        if (event.data?.data?.customer) {
+          handleCustomerDataChange(event.data.data.customer);
+        }
+      }
+    } catch (error) {
+      console.error('Error handling SMAX message:', error);
+    }
   }
 
   function handleCustomerDataChange(newCustomerData) {
+    console.log('Processing customer data:', newCustomerData);
+    
+    // Validate required fields
+    if (!newCustomerData.page_pid) {
+      console.warn('Missing page_pid in customer data');
+      return;
+    }
+
     // Set storage key based on page_pid
     formStorageKey = STORAGE_PREFIX + newCustomerData.page_pid;
     
@@ -72,6 +127,7 @@
         ...storedData,
         ...smaxData
       };
+      console.log('Merged with stored data:', formData);
     } else {
       // If no stored data, use SMAX data with default values
       formData = {
@@ -80,6 +136,7 @@
         departure_date: formatDate(addDays(new Date(), 1)),
         return_date: formatDate(addDays(new Date(), 2))
       };
+      console.log('Created new form data:', formData);
     }
     
     // Save the merged data to storage
@@ -91,17 +148,6 @@
     saveFormToStorage();
   }
 
-  onMount(async () => {
-    const loaded = await loadExternalLibraries();
-    if (!loaded) {
-      console.error('Failed to load external libraries');
-      return;
-    }
-
-    initializeDatepickers();
-    initializeEditor();
-  });
-  
   function initializeDatepickers() {
     try {
       const datepickerInputs = document.querySelectorAll('.datepicker');
