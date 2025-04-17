@@ -138,8 +138,8 @@
           if (customer.id) {
             formStorageKey = STORAGE_PREFIX + customer.id;
             console.log('Set storage key:', formStorageKey);
+            handleCustomerDataChange(customer);
           }
-          handleCustomerDataChange(customer);
         }
       }
     } catch (error) {
@@ -156,42 +156,46 @@
       return;
     }
 
-    // Always update essential data from SMAX
-    const smaxData = {
-      id: newCustomerData.id || '',
-      pid: newCustomerData.pid || '',
-      platform: newCustomerData.platform || '',
-      gid: newCustomerData.gid || '',
-      page_pid: newCustomerData.page_pid || '',
-      picture: newCustomerData.picture || '',
-      name: newCustomerData.name || '',
-      phone: newCustomerData.phone || '',
-      email: newCustomerData.email || '',
-      address: newCustomerData.address || ''
-    };
-
-    // Try to restore data from storage
+    // First, try to load data from localStorage
     const storedData = loadFormFromStorage();
     console.log('Loaded stored data:', storedData);
-    
+
+    // Start with default form data
+    let mergedData = { ...formData };
+
+    // If we have stored data, use it as base
     if (storedData) {
-      // If we have stored data, merge it with SMAX data
-      // SMAX data takes precedence for customer info
-      formData = {
-        ...storedData,
-        ...smaxData
-      };
-      console.log('Merged with stored data:', formData);
-    } else {
-      // If no stored data, use SMAX data with default values
-      formData = {
-        ...formData, // Keep default values
-        ...smaxData, // Override with SMAX data
-        departure_date: formatDate(addDays(new Date(), 1)),
-        return_date: formatDate(addDays(new Date(), 2))
-      };
-      console.log('Created new form data:', formData);
+      console.log('Using stored data as base');
+      mergedData = { ...mergedData, ...storedData };
     }
+
+    // Then, only override non-empty fields from SMAX
+    const smaxData = {
+      id: newCustomerData.id || mergedData.id,
+      pid: newCustomerData.pid || mergedData.pid,
+      platform: newCustomerData.platform || mergedData.platform,
+      gid: newCustomerData.gid || mergedData.gid,
+      page_pid: newCustomerData.page_pid || mergedData.page_pid,
+      picture: newCustomerData.picture || mergedData.picture,
+      name: newCustomerData.name || mergedData.name,
+      phone: newCustomerData.phone || mergedData.phone,
+      email: newCustomerData.email || mergedData.email,
+      address: newCustomerData.address || mergedData.address
+    };
+
+    // Apply SMAX data
+    formData = {
+      ...mergedData,
+      ...smaxData
+    };
+
+    // If this is completely new data (no stored data), set default dates
+    if (!storedData) {
+      formData.departure_date = formatDate(addDays(new Date(), 1));
+      formData.return_date = formatDate(addDays(new Date(), 2));
+    }
+
+    console.log('Final merged data:', formData);
     
     // Save the merged data to storage
     saveFormToStorage();
