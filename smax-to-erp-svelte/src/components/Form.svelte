@@ -333,24 +333,18 @@
         timeoutPromise
       ]);
 
-      console.log('Full response structure:', JSON.stringify(response, null, 2));
-
       if (!response) {
         throw new Error('No response received');
       }
 
       // Check if response is wrapped in an array
       const responseData = Array.isArray(response) ? response[0] : response;
-      console.log('Processing response data:', responseData);
 
       if (responseData.success === true && responseData.data && responseData.data.code) {
-        console.log('Found code in response:', responseData.data.code);
         const codeMatch = responseData.data.code.match(/LU(\d+)/);
-        console.log('Code match result:', codeMatch);
         
         if (codeMatch && codeMatch[1]) {
           const leadId = codeMatch[1];
-          console.log('Successfully extracted lead ID:', leadId);
           showSuccess(`Đã thêm lead <a href="https://erp.nucuoimekong.vn/admin/lead/${leadId}/show" target="_blank">#${leadId}</a>`);
           
           // Clear form storage after successful submission
@@ -370,16 +364,12 @@
             children: '0'
           };
         } else {
-          console.log('Could not extract lead ID from code');
           showSuccess(`Đã thêm lead thành công: ${responseData.data.code}`);
         }
+      } else if (responseData.message) {
+        showSuccess(responseData.message);
       } else {
-        console.log('Response structure not as expected:', responseData);
-        if (responseData.message) {
-          showSuccess(responseData.message);
-        } else {
-          showSuccess('Yêu cầu đã được gửi thành công. Vui lòng kiểm tra trong hệ thống ERP.');
-        }
+        showSuccess('Yêu cầu đã được gửi thành công. Vui lòng kiểm tra trong hệ thống ERP.');
       }
 
     } catch (error) {
