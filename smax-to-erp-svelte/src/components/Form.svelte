@@ -386,14 +386,43 @@
   }
   
   function handleResponse(response) {
-    if (response?.[0]?.success === true && response[0].data?.code) {
-      const codeMatch = response[0].data.code.match(/\D*(\d+)/);
-      const leadId = codeMatch?.[1];
+    console.log('Handling response:', response);
+    
+    // Check if response is an array and has at least one item
+    if (Array.isArray(response) && response.length > 0) {
+      const firstResponse = response[0];
       
-      if (leadId) {
-        showSuccess(`Đã thêm lead <a href="https://erp.nucuoimekong.vn/admin/lead/${leadId}/show" target="_blank">#${leadId}</a>`);
+      if (firstResponse.success === true && firstResponse.data?.code) {
+        // Extract the numeric part from the code (e.g., "13428" from "LU13428")
+        const codeMatch = firstResponse.data.code.match(/[A-Z]+(\d+)/);
+        const leadId = codeMatch?.[1];
+        
+        if (leadId) {
+          showSuccess(`Đã thêm lead <a href="https://erp.nucuoimekong.vn/admin/lead/${leadId}/show" target="_blank">#${leadId}</a>`);
+          
+          // Clear form storage after successful submission
+          if (formStorageKey) {
+            localStorage.removeItem(formStorageKey);
+          }
+          
+          // Reset form data to defaults
+          formData = {
+            ...formData,
+            ticket_name: '',
+            ticket_description: '',
+            ticket_priority: 'normal',
+            departure_date: formatDate(addDays(new Date(), 1)),
+            return_date: formatDate(addDays(new Date(), 2)),
+            adult: '1',
+            children: '0'
+          };
+        } else {
+          showSuccess(`Đã thêm lead thành công: ${firstResponse.data.code}`);
+        }
+      } else if (firstResponse.message) {
+        showSuccess(firstResponse.message);
       } else {
-        showSuccess(`Đã thêm lead thành công: ${response[0].data.code}`);
+        showSuccess('Yêu cầu đã được gửi thành công');
       }
     } else {
       showSuccess('Yêu cầu đã được gửi thành công. Vui lòng kiểm tra trong hệ thống ERP.');
