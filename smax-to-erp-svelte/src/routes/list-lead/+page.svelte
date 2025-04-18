@@ -330,7 +330,7 @@
     width: 1rem;
     height: 1rem;
     border: 2px solid #f3f3f3;
-    border-top: 2px solid #3498db;
+    border-top: 2px solid #228b22;
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
@@ -350,9 +350,10 @@
     background-color: rgba(255, 200, 75, 0.2);
     color: #ffc84b;
   }
-  .state-badge[data-color="#28a745"] {
-    background-color: rgba(40, 167, 69, 0.2);
-    color: #28a745;
+  .state-badge[data-color="#28a745"], 
+  .state-badge[data-color="#228b22"] {
+    background-color: rgba(34, 139, 34, 0.2);
+    color: #228b22;
   }
   .state-badge[data-color="#dc3545"] {
     background-color: rgba(220, 53, 69, 0.2);
@@ -370,7 +371,7 @@
   /* Card styles */
   .lead-card {
     border: 1px solid #e9ecef;
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     margin-bottom: 1rem;
     transition: all 0.2s ease;
     max-width: 500px;
@@ -380,8 +381,8 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
   .lead-card:hover {
-    box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.08);
-    border-color: #dee2e6;
+    box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.08);
+    border-color: #228b22;
   }
   .lead-header {
     background-color: #f8f9fa;
@@ -390,7 +391,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 0.75rem 0.75rem 0 0;
+    border-radius: 0.5rem 0.5rem 0 0;
   }
   .lead-code {
     font-weight: 600;
@@ -401,11 +402,11 @@
     gap: 0.5rem;
   }
   .lead-code a {
-    color: #228be6;
+    color: #228b22;
     text-decoration: none;
   }
   .lead-code a:hover {
-    color: #1971c2;
+    color: #1a6b1a;
     text-decoration: underline;
   }
   .lead-status {
@@ -429,18 +430,18 @@
     font-size: 0.875rem;
   }
   .customer-name a {
-    color: #228be6;
+    color: #228b22;
     text-decoration: none;
   }
   .customer-name a:hover {
-    color: #1971c2;
+    color: #1a6b1a;
     text-decoration: underline;
   }
   .customer-meta {
     display: flex;
     gap: 1rem;
     font-size: 0.75rem;
-    color: #868e96;
+    color: #6c757d;
     align-items: center;
   }
   .customer-type {
@@ -458,7 +459,7 @@
   }
   .lead-note {
     font-size: 0.75rem;
-    color: #868e96;
+    color: #6c757d;
     margin-top: 0.5rem;
     line-height: 1.4;
   }
@@ -467,7 +468,7 @@
     margin-bottom: 0.5rem;
   }
   .lead-note :global(a), .lead-service :global(a) {
-    color: #228be6;
+    color: #228b22;
     text-decoration: none;
   }
   .lead-note :global(a:hover), .lead-service :global(a:hover) {
@@ -480,13 +481,13 @@
     padding: 0.75rem 1rem;
     background-color: #f8f9fa;
     border-top: 1px solid #e9ecef;
-    border-radius: 0 0 0.75rem 0.75rem;
+    border-radius: 0 0 0.5rem 0.5rem;
   }
   .lead-meta {
     display: flex;
     gap: 1rem;
     font-size: 0.75rem;
-    color: #868e96;
+    color: #6c757d;
     align-items: center;
   }
   .lead-meta i {
@@ -533,11 +534,30 @@
     font-size: 0.65rem;
   }
   .btn-primary {
-    background-color: #228be6;
-    border-color: #228be6;
+    background-color: #228b22;
+    border-color: #228b22;
+    color: white;
   }
   .btn-primary:hover {
-    background-color: #1971c2;
-    border-color: #1971c2;
+    background-color: #1a6b1a;
+    border-color: #1a6b1a;
+  }
+  
+  /* Alerts */
+  .alert {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+  }
+  .alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+  }
+  .alert-info {
+    background-color: #e2f3fd;
+    border-color: #d0e9fb;
+    color: #0c5460;
   }
 </style> 

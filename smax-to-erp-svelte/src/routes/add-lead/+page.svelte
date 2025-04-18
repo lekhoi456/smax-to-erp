@@ -821,34 +821,37 @@
 <style>
   .form-container {
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     margin: 0 auto;
     background-color: white;
-    padding: 8px;
-    border-radius: 4px;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e9ecef;
   }
   
   .form-section {
-    margin-bottom: 12px;
+    margin-bottom: 1rem;
   }
   
   .form-section-title {
     font-weight: 600;
-    margin-bottom: 6px;
-    color: #495057;
+    margin-bottom: 0.5rem;
+    color: #228b22;
     font-size: 0.9rem;
-    padding-bottom: 4px;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f1f3f5;
   }
   
   .form-row {
     display: flex;
-    gap: 8px;
-    margin-bottom: 6px;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
   }
   
   .form-group {
     flex: 1;
-    margin-bottom: 6px;
+    margin-bottom: 0.5rem;
   }
   
   .input-group {
@@ -885,10 +888,10 @@
   
   .form-control {
     width: 100%;
-    padding: 6px 12px;
+    padding: 0.5rem 0.75rem;
     border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 0.9rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
     background: transparent;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     position: relative;
@@ -900,13 +903,13 @@
   }
 
   .input-group:focus-within .form-control {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+    border-color: #228b22;
+    box-shadow: 0 0 0 0.2rem rgba(34, 139, 34, 0.25);
     background: transparent;
   }
 
   .input-group:focus-within .input-group-text {
-    color: #0d6efd;
+    color: #228b22;
     background: transparent;
   }
 
@@ -937,14 +940,20 @@
   
   .submit-btn {
     width: 100%;
-    padding: 8px;
-    background-color: #28a745;
+    padding: 0.5rem;
+    background-color: #228b22;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 0.375rem;
     cursor: pointer;
-    font-size: 0.9rem;
-    margin-top: 8px;
+    font-size: 0.875rem;
+    margin-top: 1rem;
+    font-weight: 500;
+    transition: background-color 0.15s ease-in-out;
+  }
+  
+  .submit-btn:hover {
+    background-color: #1a6b1a;
   }
   
   .submit-btn:disabled {
@@ -952,11 +961,29 @@
     cursor: not-allowed;
   }
   
+  .loading {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #228b22;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 0.5rem;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
   .alert {
-    padding: 8px;
-    border-radius: 4px;
-    margin-top: 8px;
-    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    border: 1px solid transparent;
   }
   
   .alert-success {
@@ -974,41 +1001,47 @@
   /* Editor styles */
   .editor-container {
     border: 1px solid #ced4da;
-    border-radius: 4px;
+    border-radius: 0.375rem;
     overflow: hidden;
     max-height: 120px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  
+  .editor-container:focus-within {
+    border-color: #228b22;
+    box-shadow: 0 0 0 0.2rem rgba(34, 139, 34, 0.25);
   }
   
   .editor-toolbar {
-    padding: 4px;
+    padding: 0.25rem;
     background-color: #f8f9fa;
     border-bottom: 1px solid #ced4da;
     display: flex;
-    gap: 3px;
+    gap: 0.25rem;
   }
   
   .editor-btn {
     background: none;
     border: none;
-    padding: 3px 6px;
+    padding: 0.25rem 0.5rem;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     color: #6c757d;
     font-size: 0.8rem;
   }
   
   .editor-btn:hover {
     background-color: #e9ecef;
-    color: #495057;
+    color: #228b22;
   }
   
   .editor-content {
     min-height: 80px;
     max-height: 80px;
-    padding: 6px;
+    padding: 0.5rem;
     outline: none;
     overflow-y: auto;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
   }
   
   .editor-content[data-placeholder]:empty:before {
