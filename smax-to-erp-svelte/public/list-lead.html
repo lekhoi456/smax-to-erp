@@ -29,9 +29,6 @@
       font-size: 0.875rem;
       font-weight: 500;
     }
-    .btn-view-leads {
-      margin-bottom: 1rem;
-    }
     /* State colors */
     .state-badge[data-color="#ffc84b"] {
       background-color: rgba(255, 200, 75, 0.2);
@@ -57,11 +54,7 @@
 </head>
 <body>
   <div class="container-fluid py-4">
-    <button id="viewLeadsBtn" class="btn btn-primary btn-view-leads">
-      <i class="bi bi-list-ul"></i> Xem danh sách Lead
-    </button>
-
-    <div id="leads-content" style="display: none">
+    <div id="leads-content">
       <h2 class="mb-4">Danh sách Lead</h2>
       <div id="loading" class="text-center">
         <span class="loading"></span> Đang tải...
@@ -269,19 +262,12 @@
     window.addEventListener('message', (event) => {
       if (event.data?.name === '__SM_FORM_CUSTOMER' && event.data?.data?.customer?.id) {
         const smaxId = event.data.data.customer.id;
-        document.getElementById('leads-content').style.display = 'block';
         loadLeads(smaxId);
       }
     });
 
-    // Add click handler for view leads button
-    document.getElementById('viewLeadsBtn').addEventListener('click', () => {
-      showLeadsPopup();
-      requestSmaxData();
-    });
-
     // Auto show popup and request data when page loads
-    window.addEventListener('load', () => {
+    window.addEventListener('DOMContentLoaded', () => {
       showLeadsPopup();
       requestSmaxData();
     });
