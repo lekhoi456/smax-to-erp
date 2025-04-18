@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { createLead } from '../lib/api';
-  import { loadExternalLibraries } from '../lib/external-libs';
+  import { createLead } from '../../lib/api';
+  import { loadExternalLibraries } from '../../lib/external-libs';
   
   export const customerData = {};
   
