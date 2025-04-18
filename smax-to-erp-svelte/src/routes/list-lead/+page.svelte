@@ -110,7 +110,8 @@
       return data.data || null;
     } catch (error) {
       console.error('Error in getLeadFromERP:', error);
-      throw error;
+      // Don't rethrow the error, just return null so we can skip this lead
+      return null;
     }
   }
 
@@ -142,7 +143,8 @@
       return data.data || null;
     } catch (error) {
       console.error('Error in getCustomerFromERP:', error);
-      throw error;
+      // Don't rethrow the error, just return null so we can skip this lead
+      return null;
     }
   }
 
@@ -171,33 +173,41 @@
       // Get lead details from ERP for each lead
       const detailedLeads = await Promise.all(
         nocoLeads.map(async (nocoLead) => {
-          if (!nocoLead.erp_lead_id) {
-            console.warn('No ERP lead ID found for NocoDB lead:', nocoLead);
-            return null;
-          }
-          console.log('Fetching ERP lead for ID:', nocoLead.erp_lead_id);
-          const erpLead = await getLeadFromERP(nocoLead.erp_lead_id);
-          
-          if (!erpLead || !erpLead.customer) {
-            return null;
-          }
-
-          // Get customer details
-          console.log('Fetching customer details for ID:', erpLead.customer.id);
-          const customer = await getCustomerFromERP(erpLead.customer.id);
-          
-          if (!customer) {
-            return null;
-          }
-
-          return {
-            ...nocoLead,
-            ...erpLead,
-            customer: {
-              ...erpLead.customer,
-              ...customer
+          try {
+            if (!nocoLead.erp_lead_id) {
+              console.warn('No ERP lead ID found for NocoDB lead:', nocoLead);
+              return null;
             }
-          };
+            console.log('Fetching ERP lead for ID:', nocoLead.erp_lead_id);
+            const erpLead = await getLeadFromERP(nocoLead.erp_lead_id);
+            
+            if (!erpLead || !erpLead.customer) {
+              console.warn(`Skipping lead ${nocoLead.erp_lead_id} - invalid ERP lead data`);
+              return null;
+            }
+
+            // Get customer details
+            console.log('Fetching customer details for ID:', erpLead.customer.id);
+            const customer = await getCustomerFromERP(erpLead.customer.id);
+            
+            if (!customer) {
+              console.warn(`Skipping lead ${nocoLead.erp_lead_id} - could not fetch customer data`);
+              return null;
+            }
+
+            return {
+              ...nocoLead,
+              ...erpLead,
+              customer: {
+                ...erpLead.customer,
+                ...customer
+              }
+            };
+          } catch (err) {
+            // If anything fails for this specific lead, log it and return null to skip it
+            console.error(`Error processing lead ${nocoLead.erp_lead_id || 'unknown'}:`, err);
+            return null;
+          }
         })
       );
 
