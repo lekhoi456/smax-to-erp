@@ -1,26 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'smax-to-erp-frontend',
-      script: 'npm',
-      args: 'run preview',
-      cwd: './',
-      instances: 1,
-      autorestart: true,
-      watch: false,
-      max_memory_restart: '500M',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 4173,
-        VITE_API_URL: 'https://smax.ferry.vn/api'
-      },
-      error_file: './logs/frontend-error.log',
-      out_file: './logs/frontend-out.log',
-      log_file: './logs/frontend-combined.log',
-      time: true
-    },
-    {
-      name: 'smax-to-erp-api',
+      name: 'smax-to-erp',
       script: './server/index.js',
       instances: 1,
       autorestart: true,
@@ -29,11 +10,13 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 3668,
-        CORS_ORIGIN: 'https://smax.ferry.vn'
+        API_PORT: 3668,
+        CORS_ORIGIN: 'https://smax.ferry.vn',
+        VITE_API_URL: 'https://smax.ferry.vn/api'
       },
-      error_file: './logs/api-error.log',
-      out_file: './logs/api-out.log',
-      log_file: './logs/api-combined.log',
+      error_file: './logs/error.log',
+      out_file: './logs/out.log',
+      log_file: './logs/combined.log',
       time: true
     }
   ]

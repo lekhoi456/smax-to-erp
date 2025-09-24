@@ -26,13 +26,12 @@ if ! command -v pm2 &> /dev/null; then
     npm install -g pm2
 fi
 
-# Stop các process cũ nếu có
+# Stop process cũ nếu có
 echo "🛑 Stopping old processes..."
-pm2 delete smax-to-erp-frontend 2>/dev/null
-pm2 delete smax-to-erp-api 2>/dev/null
+pm2 delete smax-to-erp 2>/dev/null
 
 # Start với PM2
-echo "🎯 Starting services with PM2..."
+echo "🎯 Starting app with PM2 on port 3668..."
 pm2 start ecosystem.config.js
 
 # Save PM2 process list
@@ -43,7 +42,11 @@ pm2 startup
 
 echo "✅ Deployment complete!"
 echo ""
-echo "📊 Check status: pm2 status"
-echo "📝 View logs: pm2 logs"
-echo "🔄 Restart: pm2 restart all"
-echo "🛑 Stop: pm2 stop all"
+echo "📊 App running on port 3668"
+echo "🌐 Access via: https://smax.ferry.vn"
+echo ""
+echo "📝 PM2 Commands:"
+echo "  pm2 status      - Check status"
+echo "  pm2 logs        - View logs"
+echo "  pm2 restart all - Restart app"
+echo "  pm2 stop all    - Stop app"
