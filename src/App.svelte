@@ -1,29 +1,24 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import Form from './components/Form.svelte';
-  import DebugPanel from './components/DebugPanel.svelte';
-  import { customerData } from './stores/customerStore';
-  import { initializeFormComponents } from './utils/formUtils';
+  import { Router, Route } from "svelte-routing";
+  import Home from './routes/+page.svelte';
+  import AddLead from './routes/add-lead/+page.svelte';
+  import ListLead from './routes/list-lead/+page.svelte';
 
-  onMount(() => {
-    // Initialize form components when the app mounts
-    initializeFormComponents();
-  });
+  export let url = "";
 </script>
 
-<div class="form-container">
-  <Form />
-  <DebugPanel />
-</div>
+<Router {url}>
+  <main>
+    <Route path="/" component={Home} />
+    <Route path="/add-lead" component={AddLead} />
+    <Route path="/list-lead" component={ListLead} />
+  </main>
+</Router>
 
 <style>
-  .form-container {
-    width: 100%;
-    max-width: 400px;
+  main {
+    padding: 10px;
+    max-width: 1200px;
     margin: 0 auto;
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
-</style> 
+</style>
