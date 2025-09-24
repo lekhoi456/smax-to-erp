@@ -32,7 +32,7 @@ pm2 delete smax-to-erp-v2 2>/dev/null
 
 # Start với PM2
 echo "🎯 Starting app with PM2 on port 3668..."
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 
 # Save PM2 process list
 pm2 save

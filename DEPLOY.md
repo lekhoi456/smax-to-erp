@@ -62,7 +62,7 @@ npm install -g pm2
 ### Bước 4: Start với PM2
 ```bash
 # Start cả frontend và backend
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 
 # Hoặc start riêng lẻ:
 # Frontend (port 4173)
