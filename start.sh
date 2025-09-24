@@ -28,7 +28,7 @@ fi
 
 # Stop process cũ nếu có
 echo "🛑 Stopping old processes..."
-pm2 delete smax-to-erp 2>/dev/null
+pm2 delete smax-to-erp-v2 2>/dev/null
 
 # Start với PM2
 echo "🎯 Starting app with PM2 on port 3668..."

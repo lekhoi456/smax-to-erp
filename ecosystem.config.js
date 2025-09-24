@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'smax-to-erp',
+      name: 'smax-to-erp-v2',
       script: './server/index.js',
       instances: 1,
       autorestart: true,
