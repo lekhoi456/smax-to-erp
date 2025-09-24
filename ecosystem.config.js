@@ -11,7 +11,8 @@ module.exports = {
       max_memory_restart: '500M',
       env: {
         NODE_ENV: 'production',
-        PORT: 4173
+        PORT: 4173,
+        VITE_API_URL: 'https://smax.ferry.vn/api'
       },
       error_file: './logs/frontend-error.log',
       out_file: './logs/frontend-out.log',
@@ -27,7 +28,8 @@ module.exports = {
       max_memory_restart: '500M',
       env: {
         NODE_ENV: 'production',
-        PORT: 3000
+        PORT: 3668,
+        CORS_ORIGIN: 'https://smax.ferry.vn'
       },
       error_file: './logs/api-error.log',
       out_file: './logs/api-out.log',
